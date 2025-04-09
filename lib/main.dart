@@ -3,7 +3,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:ultimate_cloud/last_views.dart';
 import 'package:ultimate_cloud/search.dart';
 import 'package:ultimate_cloud/files.dart';
-import 'package:ultimate_cloud/video_player.dart';
+import 'package:ultimate_cloud/settings.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,11 +36,21 @@ class Navigation extends StatefulWidget {
 
 class _NavigationState extends State<Navigation> {
   int _selectedIndex = 0;
-  static const List<Widget> _widgetOptions = <Widget>[
-    LastViewsContent(),
-    VideoScreen(),
-    SearchContainer(),
-  ];
+
+  late final List<Widget> _widgetOptions;
+  final GlobalKey<FilesScreenState> _filesScreenKey = GlobalKey<FilesScreenState>();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _widgetOptions = [
+      FilesScreen(key: _filesScreenKey),
+      const LastViewsContent(),
+      const SearchContainer(),
+      const SettingsContainer(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -48,33 +58,45 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
+  Widget? _buildFab() {
+    if (_selectedIndex == 0) {
+      return FloatingActionButton(
+        onPressed: () {
+          _filesScreenKey.currentState?.uploadFile(); // ← теперь вызывается метод из FilesScreen
+        },
+        child: const Icon(Icons.cloud_upload),
+      );
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'UltimateCloud',
-          style: TextStyle(fontSize: 30, fontFamily: 'Inter'),
-        ),
-      ),
       body: _widgetOptions.elementAt(_selectedIndex),
+      floatingActionButton: _buildFab(),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Last views',
-          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.insert_drive_file_sharp),
             label: 'My files',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            label: 'Last views',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
           ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.black54,
         onTap: _onItemTapped,
       ),
     );
