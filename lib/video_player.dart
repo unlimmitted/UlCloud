@@ -18,11 +18,12 @@ class _CustomVlcPlayerState extends State<VideoScreen> {
   double _videoDuration = 0;
   Timer? _progressTimer;
   Timer? _hideControlsTimer;
+  Timer? _hideTimer;
 
   @override
   void initState() {
     super.initState();
-    final encodedUrl = Uri.encodeFull('http://172.22.0.20:56486/api/v1/storage/stream/${widget.filename}');
+    final encodedUrl = Uri.encodeFull('https://ulcloud.ru/api/v1/storage/stream/${widget.filename}');
     _controller = VlcPlayerController.network(encodedUrl);
 
     _progressTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) async {
@@ -105,21 +106,66 @@ class _CustomVlcPlayerState extends State<VideoScreen> {
     });
   }
 
+  void _toggleControls() {
+    setState(() {
+      _controlsVisible = !_controlsVisible;
+    });
+
+    if (_controlsVisible) {
+      _startHideTimer();
+    } else {
+      _hideTimer?.cancel();
+    }
+  }
+
+  void _startHideTimer() {
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(seconds: 3), () {
+      setState(() {
+        _controlsVisible = false;
+      });
+    });
+  }
+
+  double _getAspectRatio() {
+    final size = _controller.value.size;
+    if (size.width > 0 && size.height > 0) {
+      return size.width / size.height;
+    }
+    return 16 / 9; // дефолт
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _onUserInteraction,
         child: Stack(
           children: [
-            Center(
-              child: VlcPlayer(
-                controller: _controller,
-                aspectRatio: 16 / 9,
-                placeholder: const Center(child: CircularProgressIndicator()),
-              ),
+            GestureDetector(
+                onTap: _toggleControls,
+                child: SizedBox.expand(
+                    child: VlcPlayer(
+                      controller: _controller,
+                      aspectRatio: _getAspectRatio(),
+                      virtualDisplay: true,
+                      placeholder: const Center(child: CircularProgressIndicator()),
+                    ),
+                ),
             ),
+            if (_controlsVisible)
+              Positioned(
+                top: 30,
+                left: 10,
+                child: SafeArea(
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+              ),
             if (_controlsVisible)
               Positioned(
                 bottom: 0,

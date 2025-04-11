@@ -29,7 +29,7 @@ class _SearchContainerState extends State<SearchContainer> {
       _isLoading = true;
     });
 
-    final url = Uri.parse("http://172.22.0.20:56486/api/v1/torrent/search-by-kinopoisk?query=$text");
+    final url = Uri.parse("https://ulcloud.ru/api/v1/torrent/search-by-kinopoisk?query=$text");
 
     try {
       final response = await http.get(url);
@@ -197,7 +197,7 @@ class _DetailScreenState extends State<DetailScreen> {
     if (query.isEmpty) {
       return;
     }
-    final url = Uri.parse("http://172.22.0.20:56486/api/v1/torrent/search-by-rutracker?query=$query");
+    final url = Uri.parse("https://ulcloud.ru/api/v1/torrent/search-by-rutracker?query=$query");
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -222,7 +222,7 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Future<void> _downloadMovie(torrent) async {
-    final url = Uri.parse("http://172.22.0.20:56486/api/v1/torrent/download-by-transmission");
+    final url = Uri.parse("https://ulcloud.ru/api/v1/torrent/download-by-transmission");
     try {
       final response = await http.post(url, headers: {'Content-Type': 'application/json'}, body: jsonEncode(torrent));
       if (response.statusCode == 200) {
