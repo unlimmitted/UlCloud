@@ -107,7 +107,10 @@ class _SearchContainerState extends State<SearchContainer> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => DetailScreen(item: result),
+                                    builder: (_) => DetailScreen(
+                                      item: result,
+                                      query: '',
+                                    ),
                                   ),
                                 );
                               },
@@ -165,7 +168,7 @@ class _SearchContainerState extends State<SearchContainer> {
 class DetailScreen extends StatefulWidget {
   final dynamic item;
 
-  const DetailScreen({super.key, required this.item});
+  const DetailScreen({super.key, required this.item, required String query});
 
   @override
   State<DetailScreen> createState() => _DetailScreenState();
@@ -273,7 +276,65 @@ class _DetailScreenState extends State<DetailScreen> {
                   const SizedBox(height: 10),
                   Text(description),
                   const Divider(height: 30),
-                  const Text("Результаты с RuTracker:", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Результаты с RuTracker:",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        tooltip: 'Изменить запрос',
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              var name = widget.item['name'] ?? widget.item['alternativeName'] ?? '';
+                              var query = widget.item['isSeries'] ? name : "$name ${widget.item['year']}";
+                              final controller = TextEditingController(text: query);
+                              return AlertDialog(
+                                title: const Text("Редактировать запрос"),
+                                content: TextField(
+                                  controller: controller,
+                                  decoration: const InputDecoration(
+                                    hintText: "Введите новый запрос",
+                                  ),
+                                  autofocus: true,
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(),
+                                    child: const Text("Отмена"),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      final updatedQuery = controller.text.trim();
+                                      if (updatedQuery.isNotEmpty) {
+                                        Navigator.of(context).pop();
+                                        Navigator.of(context).pushReplacement(
+                                          MaterialPageRoute(
+                                            builder: (context) => DetailScreen(
+                                              query: updatedQuery,
+                                              item: {
+                                                ...widget.item,
+                                                'name': updatedQuery,
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: const Text("Обновить"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      )
+                    ],
+                  ),
                   const SizedBox(height: 10),
                   if (_isLoadingRutracker)
                     const Center(
