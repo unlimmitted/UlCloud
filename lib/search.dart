@@ -267,14 +267,14 @@ class _DetailScreenState extends State<DetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  if (year.isNotEmpty) Text("Год выпуска: $year", style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                  if (year.isNotEmpty)
+                    Text("${item['isSeries'] ? 'Сериал\n' : ''}Год выпуска: $year",
+                        style: const TextStyle(fontSize: 16, color: Colors.grey)),
                   const SizedBox(height: 10),
                   Text(description),
                   const Divider(height: 30),
                   const Text("Результаты с RuTracker:", style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
-
-                  /// 👇 Индикация загрузки
                   if (_isLoadingRutracker)
                     const Center(
                       child: Padding(
@@ -296,11 +296,40 @@ class _DetailScreenState extends State<DetailScreen> {
                         child: ListTile(
                           title: Text("Сиды: $seeds"),
                           subtitle: Text("Разрешение: $resolution\nРазмер: $size"),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.download_outlined),
-                            onPressed: () {
-                              _downloadMovie(torrent);
-                            },
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.info_outline),
+                                tooltip: "Информация о торренте",
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (_) => AlertDialog(
+                                      title: const Text("Информация о торренте"),
+                                      content: SingleChildScrollView(
+                                        child: Text(torrent["title"]),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context, rootNavigator: true).pop();
+                                          },
+                                          child: const Text("Закрыть"),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.download_outlined),
+                                tooltip: "Скачать",
+                                onPressed: () {
+                                  _downloadMovie(torrent);
+                                },
+                              ),
+                            ],
                           ),
                         ),
                       );
