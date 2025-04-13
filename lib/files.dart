@@ -30,7 +30,13 @@ class FilesScreenState extends State<FilesScreen> {
         final data = jsonDecode(decoded);
         setState(() {
           _files = data;
-          _files.sort((a, b) => a["name"].compareTo(b["name"]));
+          _files.sort((a, b) {
+            final aIsFolder = a['type'] == 'directory';
+            final bIsFolder = b['type'] == 'directory';
+            if (aIsFolder && !bIsFolder) return -1;
+            if (!aIsFolder && bIsFolder) return 1;
+            return a['name'].toLowerCase().compareTo(b['name'].toLowerCase());
+          });
         });
       } else {
         print("Ошибка загрузки: ${response.statusCode}");
@@ -83,7 +89,7 @@ class FilesScreenState extends State<FilesScreen> {
       ),
     );
     if (result != null && result.trim().isNotEmpty) {
-      final uri = Uri.parse("http://172.22.0.57:8080/api/v1/storage/create-folder");
+      final uri = Uri.parse("https://ulcloud.ru/api/v1/storage/create-folder");
       final response = await http.post(uri,
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
