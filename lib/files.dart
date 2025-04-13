@@ -30,6 +30,7 @@ class FilesScreenState extends State<FilesScreen> {
         final data = jsonDecode(decoded);
         setState(() {
           _files = data;
+          _files.sort((a, b) => a["name"].compareTo(b["name"]));
         });
       } else {
         print("Ошибка загрузки: ${response.statusCode}");

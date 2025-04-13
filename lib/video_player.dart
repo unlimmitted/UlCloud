@@ -181,6 +181,18 @@ class _CustomVlcPlayerState extends State<VideoScreen> {
     );
   }
 
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    if (hours > 0) {
+      return '${twoDigits(hours)}:${twoDigits(minutes)}:${twoDigits(seconds)}';
+    } else {
+      return '${twoDigits(minutes)}:${twoDigits(seconds)}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,15 +203,15 @@ class _CustomVlcPlayerState extends State<VideoScreen> {
         child: Stack(
           children: [
             GestureDetector(
-                onTap: _toggleControls,
-                child: SizedBox.expand(
-                    child: VlcPlayer(
-                      controller: _controller,
-                      aspectRatio: _getAspectRatio(),
-                      virtualDisplay: true,
-                      placeholder: const Center(child: CircularProgressIndicator()),
-                    ),
+              onTap: _toggleControls,
+              child: SizedBox.expand(
+                child: VlcPlayer(
+                  controller: _controller,
+                  aspectRatio: _getAspectRatio(),
+                  virtualDisplay: true,
+                  placeholder: const Center(child: CircularProgressIndicator()),
                 ),
+              ),
             ),
             if (_controlsVisible)
               Positioned(
@@ -267,6 +279,20 @@ class _CustomVlcPlayerState extends State<VideoScreen> {
                               _onUserInteraction();
                               _forward10();
                             },
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _formatDuration(Duration(milliseconds: _currentPosition.toInt())),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          Text(
+                            _formatDuration(
+                                Duration(milliseconds: (_videoDuration - _currentPosition).clamp(0, double.infinity).toInt())),
+                            style: const TextStyle(color: Colors.white),
                           ),
                         ],
                       ),
