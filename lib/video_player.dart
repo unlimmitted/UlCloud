@@ -35,7 +35,6 @@ class _CustomVlcPlayerState extends State<VideoScreen> {
         _currentPosition = position.inMilliseconds.toDouble();
       });
     });
-
     _startHideControlsTimer();
   }
 
@@ -132,7 +131,54 @@ class _CustomVlcPlayerState extends State<VideoScreen> {
     if (size.width > 0 && size.height > 0) {
       return size.width / size.height;
     }
-    return 16 / 9; // дефолт
+    return 16 / 9;
+  }
+
+  void _selectSubtitleTrack() async {
+    final subs = await _controller.getSpuTracks();
+    showDialog(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text("Выбор субтитров"),
+        children: [
+          SimpleDialogOption(
+            onPressed: () {
+              _controller.setSpuTrack(-1);
+              Navigator.pop(context);
+            },
+            child: const Text("Без субтитров"),
+          ),
+          ...subs.entries.map((e) {
+            return SimpleDialogOption(
+              onPressed: () {
+                _controller.setSpuTrack(e.key);
+                Navigator.pop(context);
+              },
+              child: Text(e.value),
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  void _selectAudioTrack() async {
+    final subs = await _controller.getAudioTracks();
+    showDialog(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text("Выбор аудио дорожки"),
+        children: subs.entries.map((e) {
+          return SimpleDialogOption(
+            onPressed: () {
+              _controller.setAudioTrack(e.key);
+              Navigator.pop(context);
+            },
+            child: Text(e.value),
+          );
+        }).toList(),
+      ),
+    );
   }
 
   @override
@@ -164,6 +210,24 @@ class _CustomVlcPlayerState extends State<VideoScreen> {
                     icon: const Icon(Icons.arrow_back, color: Colors.white),
                     onPressed: () => Navigator.pop(context),
                   ),
+                ),
+              ),
+            if (_controlsVisible)
+              Positioned(
+                top: 30,
+                right: 10,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.subtitles, color: Colors.white),
+                      onPressed: _selectSubtitleTrack,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.audiotrack, color: Colors.white),
+                      onPressed: _selectAudioTrack,
+                    ),
+                  ],
                 ),
               ),
             if (_controlsVisible)

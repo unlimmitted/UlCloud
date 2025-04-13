@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:ultimate_cloud/last_views.dart';
 import 'package:ultimate_cloud/search.dart';
@@ -60,11 +61,22 @@ class _NavigationState extends State<Navigation> {
 
   Widget? _buildFab() {
     if (_selectedIndex == 0) {
-      return FloatingActionButton(
-        onPressed: () {
-          _filesScreenKey.currentState?.uploadFile(); // ← теперь вызывается метод из FilesScreen
-        },
-        child: const Icon(Icons.cloud_upload),
+      return SpeedDial(
+        animatedIcon: AnimatedIcons.menu_close,
+        backgroundColor: Colors.grey,
+        overlayOpacity: 0.1,
+        children: [
+          SpeedDialChild(
+            child: const Icon(Icons.cloud_upload),
+            label: 'Загрузить файл',
+            onTap: _filesScreenKey.currentState?.uploadFile,
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.create_new_folder),
+            label: 'Создать папку',
+            onTap: () => _filesScreenKey.currentState?.showCreateFolderDialog(context),
+          ),
+        ],
       );
     }
     return null;

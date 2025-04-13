@@ -193,7 +193,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
   Future<void> _fetchRutrackerResults() async {
     final name = widget.item['name'] ?? widget.item['alternativeName'] ?? '';
-    final query = "$name ${widget.item['year']}";
+    final query = widget.item['isSeries'] ? name : "$name ${widget.item['year']}";
     if (query.isEmpty) {
       return;
     }
